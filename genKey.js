@@ -1,15 +1,24 @@
 const openpgp = require('openpgp');
 
-(async () => {
-    const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-        type: 'ecc', // Type of the key, defaults to ECC
-        curve: 'curve25519', // ECC curve name, defaults to curve25519
-        userIDs: [{ name: 'Jon Smith', email: 'jon@example.com' }], // you can pass multiple user IDs
-        passphrase: 'super long and hard to guess secret', // protects the private key
-        format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
-    });
+const data = {
+    userIDs: [{ name: 'Jon Smith', email: 'ok@test.com' }],
+    passphrase: 'super long and hard to guess secret',
+};
 
-    console.log(privateKey);     // '-----BEGIN PGP PRIVATE KEY BLOCK ... '
-    console.log(publicKey);      // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
-    console.log(revocationCertificate); // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
-})();
+async function generateKey(data) {
+    const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+        type: data.type || 'ecc',
+        curve: data.curve || 'curve25519',
+        userIDs: data.userIDs,
+        passphrase: data.passphrase,
+        format: data.format || 'armored'
+    });
+    return { privateKey, publicKey, revocationCertificate };
+}
+
+generateKey(data).then((keys) => {
+    for (const key in keys) {
+        console.log(key + ':\n\n', keys[key]);
+        console.log('--------------------------\n');
+    }
+});
